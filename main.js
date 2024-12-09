@@ -1,3 +1,3 @@
 require('dotenv').config();
-const Application = require('./src/main');
+const Application = require('./src/server');
 new Application();
