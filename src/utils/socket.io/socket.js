@@ -31,31 +31,33 @@ const initSocket = (server) => {
 
         if (members.length < 2) return socketMessage(socket, 'error', 'Room', 'members must be at least two member');
 
+        if (!title) return socketMessage(socket, 'error', 'Room', 'Title is empty.  ');
+
         const validateMember = await findUser(socket, members);
         if (!validateMember) return socketMessage(socket, 'error', 'members', `Not Found UserID`);
         const validateAdmin = await findUser(socket, admin);
         if (!validateAdmin) return socketMessage(socket, 'error', 'admin', `Not Found UserID`);
 
-        const rooms = await Room.find({ members: userId });
-        const areArraysEqual = (arr1, arr2) => {
-          if (arr1.length !== arr2.length) return false;
-          const set = new Set(arr1);
-          return arr2.every((item) => set.has(item));
-        };
+        // const rooms = await Room.find({ members: userId });
+        // const areArraysEqual = (arr1, arr2) => {
+        //   if (arr1.length !== arr2.length) return false;
+        //   const set = new Set(arr1);
+        //   return arr2.every((item) => set.has(item));
+        // };
 
-        // چک کردن گروه‌های تکراری
-        for (const room of rooms) {
-          // تبدیل ObjectId ها به string برای مقایسه صحیح
-          const currentMembers = room.members.map((member) => member.toString());
-          const newMembers = members.map((member) => member.toString());
+        // // چک کردن گروه‌های تکراری
+        // for (const room of rooms) {
+        //   // تبدیل ObjectId ها به string برای مقایسه صحیح
+        //   const currentMembers = room.members.map((member) => member.toString());
+        //   const newMembers = members.map((member) => member.toString());
 
-          if (areArraysEqual(currentMembers, newMembers)) {
-            return socketMessage(socket, 'error', 'Room', 'این گروه قبلاً ایجاد شده است');
-          }
-        }
+        //   if (areArraysEqual(currentMembers, newMembers)) {
+        //     return socketMessage(socket, 'error', 'Room', 'این گروه قبلاً ایجاد شده است');
+        //   }
+        // }
 
         const newRoom = new Room({
-          title: title || null,
+          title: title,
           members: members,
           admin: admin,
           description: description || '',
@@ -94,7 +96,6 @@ const initSocket = (server) => {
             .populate('lastMessage', ['content', 'createdAt'])
             .populate('qrng')
             .exec();
-          console.log(userRooms.members);
           io.to(memberId.toString()).emit('rooms', userRooms);
         });
       } catch (error) {
@@ -136,6 +137,11 @@ const initSocket = (server) => {
             path: 'room',
             select: ['title', 'createdAt', 'admin', 'lastMessage'],
             populate: [
+              {
+                path: 'qrng',
+                select: ['keyFileName', 'keyFilePath', 'totalKeyLength', 'currentIndex'],
+              },
+
               {
                 path: 'lastMessage',
                 select: ['content', 'createdAt'],

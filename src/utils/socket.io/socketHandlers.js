@@ -1,6 +1,3 @@
-const userModel = require('../../models/user.model');
-const Room = require('../../models/room.model');
-
 // مدیریت خطاها
 const socketMessage = (socket, method, type, message) => {
   socket.emit('messages', { method: method, type, message });
