@@ -6,7 +6,7 @@ const qrngSchema = new mongoose.Schema(
     roomId: { type: mongoose.Schema.Types.ObjectId, ref: 'Room', required: true },
     keyFileName: { type: String, required: true },
     keyFilePath: { type: String, required: true },
-    currentIndex: { type: Number, default: 0, required: true },
+    currentIndex: { type: Number, default: 1 },
     isExhausted: { type: Boolean, default: true },
     totalKeyLength: { type: Number, required: true },
   },

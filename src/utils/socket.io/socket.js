@@ -66,7 +66,7 @@ const initSocket = (server) => {
 
         const keyFileName = data?.data?.keyFileName;
         const keyFilePath = data?.data?.keyFilePath;
-        const totalKeyLength = data?.data?.totalKeyLength;
+        const totalKeyLength = parseInt(data?.data?.totalKeyLength);
 
         if (encryption) {
           if (!keyFileName) return socketMessage(socket, 'error', 'Room', 'keyFileName not available');
@@ -107,6 +107,8 @@ const initSocket = (server) => {
       try {
         const roomId = data?.data?.roomId;
         const content = data?.data?.content;
+        const keyID = data?.data?.keyID;
+        const currentIndex = parseInt(data?.data?.currentIndex);
 
         // بررسی عضویت کاربر در روم
         const room = await Room.findById(roomId);
@@ -127,6 +129,10 @@ const initSocket = (server) => {
         });
 
         await newMessage.save();
+
+        if (keyID) {
+          await qrngModel.findByIdAndUpdate(keyID, { $inc: { currentIndex } });
+        }
 
         room.lastMessage = newMessage._id;
         await room.save();

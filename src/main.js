@@ -32,7 +32,7 @@ module.exports = class Application {
   }
 
   createMongodb() {
-    const DATABASE_MONGODB = `mongodb://${process.env.DATABASE_MONGODB_HOST}:${process.env.DATABASE_MONGODB_PORT}/messenger`;
+    const DATABASE_MONGODB = `mongodb://127.0.0.1:27017/messenger`;
     mongoose.connect(DATABASE_MONGODB);
     mongoose.set('strictPopulate', true);
     mongoose.set('strictQuery', true);
@@ -49,7 +49,7 @@ module.exports = class Application {
       next(createError.NotFound('آدرس مورد نظر پیدا نشد'));
     });
     app.use((error, req, res, next) => {
-      const serverError = createError.InternalServerError('InternalServerError');
+      const serverError = createError.InternalServerError(error);
       const message = error.message || serverError.message;
       const status = error.status || serverError.status;
       return res.status(status).json({ message: message });

@@ -13,7 +13,7 @@ exports.verifyUser = async (req, res, next) => {
     if (!req.headers['authorization']) return res.status(403).json({ message: 'Access denied. No token provided.' });
     const token = tokens(req?.headers);
 
-    JWT.verify(token, process.env.JWT_ACCESS_TOKEN_SECRET_USER, async (err, paylod) => {
+    JWT.verify(token, 'ACCESS_TOKEN_SECRET', async (err, paylod) => {
       if (err) return res.status(403).json({ message: 'Invalid token.' });
       const user = await userModel.findById(paylod.id, { __v: 0, updatedAt: 0 });
       if (!user) return res.status(403).json({ message: 'Invalid token.' });
