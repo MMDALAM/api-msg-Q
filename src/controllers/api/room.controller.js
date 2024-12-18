@@ -15,6 +15,7 @@ class roomController extends controller {
         .sort({ lastMessage: -1 })
         .populate('members', ['username', 'createdAt'])
         .populate('admin', ['username', 'createdAt'])
+        .populate('qrng')
         .populate('lastMessage', ['content', 'createdAt'])
         .sort({ 'lastMessage.createdAt': -1 })
         .exec();

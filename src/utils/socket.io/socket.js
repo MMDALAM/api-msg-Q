@@ -112,19 +112,18 @@ const initSocket = (server) => {
 
         // بررسی عضویت کاربر در روم
         const room = await Room.findById(roomId);
-        if (!room) {
-          return socketMessage(socket, 'error', 'message', 'Room not found');
-        }
+        if (!room) return socketMessage(socket, 'error', 'message', 'Room not found');
 
-        if (!room.members.includes(userId)) {
-          return socketMessage(socket, 'error', 'message', 'You are not a member of this room');
-        }
+        if (!room.members.includes(userId)) return socketMessage(socket, 'error', 'message', 'You are not a member of this room');
+
+        const key = await qrngModel.findById(keyID);
 
         // ایجاد پیام جدید
         const newMessage = new Message({
           room: roomId,
           sender: userId,
           content,
+          index: parseInt(key.currentIndex),
           // seen: [userId], // فرستنده پیام رو دیده
         });
 
@@ -137,7 +136,7 @@ const initSocket = (server) => {
         room.lastMessage = newMessage._id;
         await room.save();
         // پاپیولیت کردن اطلاعات فرستنده
-        const newMsg = await Message.findById(newMessage._id, { room: 1, sender: 1, content: 1, createdAt: 1 })
+        const newMsg = await Message.findById(newMessage._id, { room: 1, sender: 1, content: 1, createdAt: 1, index: 1 })
           .populate('sender', ['username', 'createdAt'])
           .populate({
             path: 'room',
@@ -167,6 +166,7 @@ const initSocket = (server) => {
             .sort({ lastMessage: -1 })
             .populate('members', ['username', 'createdAt'])
             .populate('admin', ['username', 'createdAt'])
+            .populate('qrng')
             .populate('lastMessage', ['content', 'createdAt'])
             .sort({ 'lastMessage.createdAt': -1 })
             .exec();

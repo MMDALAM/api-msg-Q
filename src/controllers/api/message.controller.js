@@ -21,7 +21,12 @@ class messageController extends controller {
           page,
           populate: [
             { path: 'sender', select: ['username', 'createdAt'] },
-            { path: 'room', select: ['title', 'createdAt'], populate: [{ path: 'lastMessage', select: ['content', 'createdAt'] }] },
+            {
+              path: 'room',
+              select: ['title', 'createdAt'],
+              populate: [{ path: 'lastMessage', select: ['content', 'createdAt'] }],
+              populate: [{ path: 'qrng' }],
+            },
           ],
         }
       );
