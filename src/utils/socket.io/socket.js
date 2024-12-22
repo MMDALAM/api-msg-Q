@@ -77,15 +77,23 @@ const initSocket = (server) => {
         await newRoom.save();
 
         if (encryption) {
-          const newKey = new qrngModel({
-            roomId: newRoom._id,
-            keyFileName,
-            keyFilePath,
-            totalKeyLength,
-          });
-          await newKey.save();
-          await newRoom.qrng.push(newKey._id);
-          await newRoom.save();
+          const key = await qrngModel.findOne({ keyFileName });
+          if (key) {
+            newRoom.qrng.push(key._id);
+            await newRoom.save();
+            key.roomId.push(newRoom._id);
+            await key.save();
+          } else {
+            const newKey = new qrngModel({
+              roomId: newRoom._id,
+              keyFileName,
+              keyFilePath,
+              totalKeyLength,
+            });
+            await newKey.save();
+            newRoom.qrng.push(newKey._id);
+            await newRoom.save();
+          }
         }
 
         // ارسال اطلاعات گروه جدید به همه اعضا
