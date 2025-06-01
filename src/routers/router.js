@@ -10,6 +10,6 @@ router.use('/api/v1/auth', authRouter);
 
 //**********router user***********/
 const { userRouter } = require('./auth/user');
-router.use('/api/v1/users', userRouter);
+router.use('/api/v1/user', userRouter);
 
 module.exports = { AllRouters: router };

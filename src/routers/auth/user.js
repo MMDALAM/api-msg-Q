@@ -7,5 +7,6 @@ const { verify } = require('../../middlewares/auth.widdleware');
 //****user****
 router.get('/', verify, userController.findMany);
 router.delete('/:id', verify, userController.delete);
+router.post('/info', verify, userController.info);
 
 module.exports = { userRouter: router };

@@ -1,5 +1,6 @@
 const userModel = require('../../models/user.model');
 const { isValidMongoId } = require('../../utils/function');
+const { profileSchema } = require('../../validators/auth.validator');
 const controller = require('../contoller');
 
 class userController extends controller {
@@ -24,6 +25,33 @@ class userController extends controller {
       return res.status(200).json({ message: 'User Deleted' });
     } catch (err) {
       next(err);
+    }
+  }
+
+  async info(req,res,next){
+    try {
+      await profileSchema.validateAsync(req.body);
+      const { firstName, lastName, username } = req.body;
+      const user = await userModel.findById(req?.user?._id);
+
+
+      if(firstName)
+        (firstName) ? user.firstName = firstName : "";
+
+      if(lastName)
+        (lastName) ? user.lastName = lastName : "";
+
+      if(username){
+        (username) ? user.username = username : "";
+        const usernames = await userModel.findOne({username});
+        if (usernames) return res.status(404).json({ message: 'Username exists.' });
+      }
+
+      await user.save();
+
+      return res.status(200).json({ message: 'success save information' });
+    } catch (err) {
+      next(err)
     }
   }
 }

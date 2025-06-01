@@ -4,8 +4,8 @@ const mongoose = require('mongoose');
 const http = require('http');
 const cors = require('cors');
 require('dotenv').config();
-// const { SERVER_PORT } = process.env;
-const SERVER_PORT = 5000;
+const { SERVER_PORT } = process.env;
+const { DATABASE_MONGODB_URL } = process.env;
 const createError = require('http-errors');
 const { AllRouters } = require('./routers/router');
 const initSocket = require('./utils/socket.io/socket');
@@ -32,8 +32,7 @@ module.exports = class Application {
   }
 
   createMongodb() {
-    const DATABASE_MONGODB = `mongodb://127.0.0.1:27017/messenger`;
-    mongoose.connect(DATABASE_MONGODB);
+    mongoose.connect(DATABASE_MONGODB_URL);
     mongoose.set('strictPopulate', true);
     mongoose.set('strictQuery', true);
     mongoose.connection.on('connected', () => console.log(`connect to mongodb `));

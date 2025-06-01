@@ -1,10 +1,11 @@
 const JWT = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const userModel = require('../models/user.model');
+
 function jwtSign(id) {
   return new Promise(async (resolve, reject) => {
     const user = await userModel.findById(id);
-    JWT.sign({ id: id }, 'ACCESS_TOKEN_SECRET', { expiresIn: '1y' }, async (err, token) => {
+    JWT.sign({ id: id }, process.env.JWT_ACCESS_TOKEN_SECRET_USER, { expiresIn: '1y' }, async (err, token) => {
       if (err) reject(err.message);
       user.token = token;
       await user.save();
@@ -22,6 +23,10 @@ async function comparePass(password, hash) {
   return await bcrypt.compareSync(password, hash);
 }
 
+function randomCode() {
+  return Math.floor(Math.random() * 90000 + 10000);
+}
+
 async function isValidMongoId(id) {
   if (!id) return false;
   if (id.length !== 24) return false;
@@ -30,4 +35,4 @@ async function isValidMongoId(id) {
   return false;
 }
 
-module.exports = { jwtSign, hashPass, comparePass, isValidMongoId };
+module.exports = { jwtSign, hashPass, comparePass, isValidMongoId ,randomCode};
