@@ -40,6 +40,12 @@ module.exports = class Application {
   }
 
   createRoutes() {
+    app.get('/', (req, res) => {
+      return res.status(200).json('api.qmsg.com')
+    });
+    app.post('/', (req, res) => {
+      return res.status(200).json('api.qmsg.com')
+    });
     app.use(AllRouters);
   }
 
