@@ -1,8 +1,10 @@
 const userModel = require('../../models/user.model');
-const { isValidMongoId } = require('../../utils/function');
+const { isValidMongoId, hashString, compareString } = require('../../utils/function');
 const { profileSchema } = require('../../validators/auth.validator');
 const { sendSuccess, sendError } = require("../../utils/res");
 const controller = require('../contoller');
+const path = require('path');
+const fs = require('fs');
 
 class userController extends controller {
   async findMany(req, res, next) {
@@ -53,6 +55,72 @@ class userController extends controller {
       next(err)
     }
   }
+
+  async avatar(req, res, next) {
+    try {
+      
+      const userId = req?.user?.id;
+      const user = await userModel.findById(userId);
+      const hash = await hashString();
+
+      // حذف فایل‌های قبلی اگر وجود داشته باشند
+      if (user.avatar && Array.isArray(user.avatar)) {
+        for (const fileObj of user.avatar) {
+          const filePath = path.resolve(path.join(fileObj.path));
+          if (fs.existsSync(filePath)) {
+            try {
+              fs.unlinkSync(filePath);
+            } catch (err) {
+              console.warn(`خطا در حذف فایل: ${fileObj.path}`, err.message);
+            }
+          }
+        }
+      }
+
+      // ساخت آرایه جدید از فایل‌های آپلود شده
+      const avatars = req.files.map(file => ({
+        url: `${process.env.URL_RES}QU/${hash}`,
+        path:  `${req.body.fileUploadPath}/${file.filename}`,
+        hash: hash,
+      }));
+
+      // به‌روزرسانی کاربر با آرایه جدید (نه $push)
+      await userModel.findByIdAndUpdate(userId, {
+        $set: { avatar: avatars },
+      });
+
+      return res.status(200).json({
+        message: 'تصویر با موفقیت آپلود شدند.',
+        avatars,
+      });
+
+    } catch (err) {
+      console.log(err);
+      if (err.code === 'LIMIT_FILE_SIZE')
+        return res.status(400).json({ message: 'حجم فایل نباید بیشتر از 3 مگابایت باشد.' });
+
+      next(err);
+    }
+  }
+
+  async get_avatar(req,res,next){
+    try {
+      const { hash } = req.params;
+
+      const user = await userModel.findOne({ 'avatar.hash' : hash});
+      if (!user) return res.status(404).send('کاربر پیدا نشد');
+
+
+      const filePath = path.resolve(path.join(user.avatar[0].path));
+      if (!fs.existsSync(filePath)) return res.status(404).send('فایل پیدا نشد');
+      return res.sendFile(filePath);
+
+    } catch (err) {
+      next(err)
+    }
+  }
+
+
 }
 
 module.exports = new userController();

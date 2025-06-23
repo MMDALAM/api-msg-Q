@@ -6,9 +6,11 @@ const roomController = require('../../controllers/api/room.controller');
 const messageController = require('../../controllers/api/message.controller');
 const keyController = require('../../controllers/api/key.controller');
 
+
 //****api****
 //****users****
 router.get('/users', userController.findMany);
+
 //****rooms****
 router.get('/rooms/:id', roomController.findManyRooms);
 router.delete('/rooms/:room/:id', roomController.deleteRooms);

@@ -1,13 +1,23 @@
 const { default: mongoose } = require('mongoose');
+const schema = mongoose.Schema;
 
-const user = mongoose.Schema(
+const avatars = new schema({
+  url: { type: String },
+  path: { type: String },
+  hash: { type: String},
+});
+
+const user = new schema(
   {
     username: { type: String },
     firstName: { type: String },
     lastName: { type: String },
     phone: { type: String },
     email: { type: String },
-    avatar: { type: String },
+    avatar: {
+      type: [avatars],
+      default: [],
+    },
     status: { type: String, default: 'offline' },
     role: { type: String, default: 'user' },
     token: { type: String },

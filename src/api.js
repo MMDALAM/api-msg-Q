@@ -54,6 +54,8 @@ module.exports = class Application {
       next(createError.NotFound('آدرس مورد نظر پیدا نشد'));
     });
     app.use((error, req, res, next) => {
+      if (error.code === 'LIMIT_FILE_SIZE')
+        return res.status(400).json({ message: 'حجم فایل نباید بیشتر از 3 مگابایت باشد.' });
       const serverError = createError.InternalServerError(error);
       const message = error.message || serverError.message;
       const status = error.status || serverError.status;

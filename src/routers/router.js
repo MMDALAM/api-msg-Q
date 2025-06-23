@@ -12,4 +12,7 @@ router.use('/api/v1/auth', authRouter);
 const { userRouter } = require('./auth/user');
 router.use('/api/v1/user', userRouter);
 
+const { resRouter } = require('./api/res');
+router.use('/QU/', resRouter);
+
 module.exports = { AllRouters: router };

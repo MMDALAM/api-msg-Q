@@ -1,6 +1,11 @@
 const JWT = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const userModel = require('../models/user.model');
+const crypto = require('crypto');
+
+function hashString() {
+  return crypto.createHash('sha1').digest('hex').substring(0, 18);
+}
 
 function jwtSign(id) {
   return new Promise(async (resolve, reject) => {
@@ -14,12 +19,12 @@ function jwtSign(id) {
   });
 }
 
-async function hashPass(password) {
-  const hashpassword = await bcrypt.hashSync(password, 10);
-  return hashpassword;
+async function hashPassword(password) {
+  const hashstring = await bcrypt.hashSync(password, 10);
+  return hashstring;
 }
 
-async function comparePass(password, hash) {
+async function comparePassword(password, hash) {
   return await bcrypt.compareSync(password, hash);
 }
 
@@ -35,4 +40,4 @@ async function isValidMongoId(id) {
   return false;
 }
 
-module.exports = { jwtSign, hashPass, comparePass, isValidMongoId ,randomCode};
+module.exports = { jwtSign, hashString,hashPassword ,comparePassword, isValidMongoId ,randomCode};
