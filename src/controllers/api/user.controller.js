@@ -63,7 +63,6 @@ class userController extends controller {
       const user = await userModel.findById(userId);
       const hash = await hashString();
 
-      // حذف فایل‌های قبلی اگر وجود داشته باشند
       if (user.avatar && Array.isArray(user.avatar)) {
         for (const fileObj of user.avatar) {
           const filePath = path.resolve(path.join(fileObj.path));
@@ -77,14 +76,12 @@ class userController extends controller {
         }
       }
 
-      // ساخت آرایه جدید از فایل‌های آپلود شده
       const avatars = req.files.map(file => ({
         url: `${process.env.URL_RES}QU/${hash}`,
         path:  `${req.body.fileUploadPath}/${file.filename}`,
         hash: hash,
       }));
 
-      // به‌روزرسانی کاربر با آرایه جدید (نه $push)
       await userModel.findByIdAndUpdate(userId, {
         $set: { avatar: avatars },
       });
@@ -95,10 +92,8 @@ class userController extends controller {
       });
 
     } catch (err) {
-      console.log(err);
       if (err.code === 'LIMIT_FILE_SIZE')
         return res.status(400).json({ message: 'حجم فایل نباید بیشتر از 3 مگابایت باشد.' });
-
       next(err);
     }
   }
@@ -109,7 +104,6 @@ class userController extends controller {
 
       const user = await userModel.findOne({ 'avatar.hash' : hash});
       if (!user) return res.status(404).send('کاربر پیدا نشد');
-
 
       const filePath = path.resolve(path.join(user.avatar[0].path));
       if (!fs.existsSync(filePath)) return res.status(404).send('فایل پیدا نشد');
