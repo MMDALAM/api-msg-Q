@@ -61,7 +61,7 @@ class userController extends controller {
       
       const userId = req?.user?.id;
       const user = await userModel.findById(userId);
-      const hash = await hashString();
+      const hash = await hashString(userId);
 
       if (user.avatar && Array.isArray(user.avatar)) {
         for (const fileObj of user.avatar) {
@@ -76,6 +76,7 @@ class userController extends controller {
         }
       }
 
+
       const avatars = req.files.map(file => ({
         url: `${process.env.URL_RES}QU/${hash}`,
         path:  `${req.body.fileUploadPath}/${file.filename}`,
@@ -87,13 +88,11 @@ class userController extends controller {
       });
 
       return res.status(200).json({
-        message: 'تصویر با موفقیت آپلود شدند.',
+        message: 'تصویر با موفقیت آپلود شد.',
         avatars,
       });
 
     } catch (err) {
-      if (err.code === 'LIMIT_FILE_SIZE')
-        return res.status(400).json({ message: 'حجم فایل نباید بیشتر از 3 مگابایت باشد.' });
       next(err);
     }
   }
@@ -109,6 +108,25 @@ class userController extends controller {
       if (!fs.existsSync(filePath)) return res.status(404).send('فایل پیدا نشد');
       return res.sendFile(filePath);
 
+    } catch (err) {
+      next(err)
+    }
+  }
+
+  async delete_avatar(req,res,next){
+    try {
+      const { hash } = req.params;
+
+      const user = await userModel.findOne({ 'avatar.hash' : hash});
+      if (!user) return res.status(404).send('کاربر پیدا نشد');
+
+      const filePath = path.resolve(path.join(user.avatar[0].path));
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+            return res.status(200).json({message: 'تصویر با موفقیت حذف شد.',});
+          }
+
+      return res.status(200).json({message: '!خطا در حذف تصویر',});
     } catch (err) {
       next(err)
     }
